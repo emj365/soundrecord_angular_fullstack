@@ -1,0 +1,49 @@
+div(ng-include='"components/navbar/navbar.html"')
+
+header#banner.hero-unit
+  .container
+    h1 录音
+    p.lead 分段发送、页面无刷新、多客户端同步接收
+    //- img(src='assets/images/yeoman.png', alt='I\'m Yeoman')
+
+.container
+  .row
+    .col-lg-12
+      h1.page-header 保存的录音：
+      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in awesomeThings')
+        li
+          a(href='#', tooltip='{{thing.info}}')
+            audio(src="{{thing.name}}", controls)
+            button.close(type='button', ng-click='deleteThing(thing)') ×
+
+  .row
+    .col-lg-12
+      h2.page-header 录音：
+      div(ng-controller="RecordCtrl")
+        button.btn.btn-primary(ng-click="onRecord()", ng-disabled="recording") 开始录
+         | &nbsp
+        button.btn(ng-click="onStopRecord()", ng-disabled="!recording") 停止
+         | &nbsp
+
+        div(ng-show="url")
+          h3 回放：
+          audio(ng-src="{{url}}", controls)
+          br
+          button.btn(ng-click="onUpload()") 上传
+
+
+  //- form.thing-form
+  //-   label Syncs in realtime across clients
+  //-   p.input-group
+  //-     input.form-control(type='text', placeholder='Add a new thing here.', ng-model='newThing')
+  //-     span.input-group-btn
+  //-       button.btn.btn-primary(type='submit', ng-click='addThing()') Add New
+
+footer.footer
+  .container
+    p
+      //- | Angular Fullstack v2.0.13
+      //- = ' | '
+      //- a(href='https://twitter.com/tyhenkel') @tyhenkel
+      //- = ' | '
+      //- a(href='https://github.com/DaftMonk/generator-angular-fullstack/issues?state=open') Issues
