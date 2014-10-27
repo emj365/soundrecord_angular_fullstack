@@ -13,7 +13,7 @@ header#banner.hero-unit
       ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in awesomeThings')
         li
           a(href='#', tooltip='{{thing.info}}')
-            audio(src="{{thing.name}}", controls)
+            audio(ng-src="{{thing.name}}", controls)
             button.close(type='button', ng-click='deleteThing(thing)') ×
 
   .row

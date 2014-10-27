@@ -7,7 +7,7 @@ angular.module 'papaApp'
     # Allow same origin resource loads.
     "self"
     # Allow loading from our assets domain.  Notice the difference between * and **.
-    "data:**"
+    "blob:**"
   ]
   return
 
@@ -76,8 +76,8 @@ angular.module 'papaApp'
     $scope.onStopRecord = ->
       $scope.recording = false
       recorderObject.stop()
-      recorderObject.exportMP3 (base64_mp3_data) ->
-        $scope.url = "data:audio/mp3;base64," + base64_mp3_data
+      recorderObject.exportMP3 (url) ->
+        $scope.url = url
         $scope.$apply()
         console.log 'encoded ' + $scope.url
       console.log 'stoped'

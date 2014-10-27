@@ -82,7 +82,7 @@
 
           encoderWorker.addEventListener('message', function(e) {
             if (e.data.cmd == 'data') {
-              cb(encode64(e.data.buffer));
+              cb(URL.createObjectURL(blob));
             }
           });
 
