@@ -12,6 +12,7 @@ angular.module 'papaApp'
   return
 
 .controller 'MainCtrl', ($scope, $http, socket) ->
+
   $scope.awesomeThings = []
 
   $http.get('/api/things').success (awesomeThings) ->
@@ -22,7 +23,6 @@ angular.module 'papaApp'
     return if $scope.newThing is ''
     $http.post '/api/things',
       name: $scope.newThing
-
     $scope.newThing = ''
 
   $scope.deleteThing = (thing) ->
@@ -33,61 +33,85 @@ angular.module 'papaApp'
 
 .controller(
   'RecordCtrl',
-  ['$scope', '$http', '$window', ($scope, $http, $window) ->
+  ['$scope', '$http', '$window', '$timeout', '$upload', ($scope, $http, $window, $timeout, $upload) ->
 
-    try
-      # webkit shim
-      $window.AudioContext = $window.AudioContext or $window.webkitAudioContext
-      navigator.getUserMedia = (
-        $window.navigator.getUserMedia ||
-        $window.navigator.webkitGetUserMedia ||
-        $window.navigator.mozGetUserMedia ||
-        $window.navigator.msGetUserMedia)
-      $window.URL = $window.URL or $window.webkitURL
-      audio_context = new AudioContext
-      console.log "Audio context set up."
-      console.log "navigator.getUserMedia " + ((if navigator.getUserMedia then "available." else "not present!"))
-    catch e
-      alert "No web audio support in this browser!"
+    $scope.canRecord    = false
+    $scope.name         = ''
+    $scope.recording    = false
+    $scope.url          = false
+    $scope.secondsCount = 30
 
-    recorderObject = null
+    mediaRecorder = null
+    audioBlob     = null
 
-    $scope.recording = false
-    $scope.url       = false
-
-    $scope.onRecord = ->
-      $scope.url       = false
-      $scope.recording = true
-      # do recording
-      navigator.getUserMedia
-        audio: true
-      , ((stream) ->
-        recorderObject = new MP3Recorder(audio_context, stream,
-          statusContainer: null
-          statusMethod: "replace"
-        )
-        recorderObject.start()
+    countSeconds = ->
+      $timeout( ->
+        if $scope.secondsCount > 0
+          $scope.secondsCount = $scope.secondsCount - 1
+          countSeconds()
         return
-      ), (e) ->
-        # nothing
-      console.log 'recording'
+      , 1000 )
+
+    onMediaSuccess = (stream) ->
+      $scope.canRecord = true
+      $scope.$apply()
+
+      mediaRecorder = new MediaStreamRecorder(stream)
+      mediaRecorder.mimeType = "audio/ogg"
+      mediaRecorder.ondataavailable = (blob) ->
+        console.log blob.length
+        $scope.recording = false
+        $scope.url       = URL.createObjectURL(blob)
+        audioBlob        = blob
+        return
+      console.log "media success"
+
+      $scope.onRecord = ->
+        $scope.url          = false
+        $scope.recording    = true
+        $scope.secondsCount = 30
+        mediaRecorder.start(30000)
+        countSeconds()
+        console.log 'recording'
+        return
+
+      $scope.onStopRecord = ->
+        mediaRecorder.stop();
+        console.log 'stoped'
+        return
+
+      $scope.onUpload = ->
+        file = audioBlob
+        if !$scope.name
+          $scope.name = Date.now()
+        $scope.upload = $upload.upload(
+          headers: {'header-key': undefined},
+          withCredentials: true,
+          url: "/api/things"
+          method: 'POST'
+          data: {name: $scope.name}
+          file: file
+        ).progress((evt) ->
+          console.log "percent: " + parseInt(100.0 * evt.loaded / evt.total)
+          return
+        ).success((data, status, headers, config) ->
+          # file is uploaded successfully
+          $scope.name = ''
+          console.log data
+          return
+        )
+        return
+
       return
 
-    $scope.onStopRecord = ->
-      $scope.recording = false
-      recorderObject.stop()
-      recorderObject.exportMP3 (url) ->
-        $scope.url = url
-        $scope.$apply()
-        console.log 'encoded ' + $scope.url
-      console.log 'stoped'
+    onMediaError = (e) ->
+      console.error "media error", e
+      return
 
-    $scope.onUpload = ->
-        console.log 'sending'
-        console.log $scope.url
-        $http.post('/api/things', name: $scope.url)
-        recorderObject.logStatus ""
-        return
+    mediaConstraints = audio: true
+    navigator.getUserMedia mediaConstraints, onMediaSuccess, onMediaError
+    # if navigator.getUserMedia
+      # $scope.support = true
 
     return
 ])

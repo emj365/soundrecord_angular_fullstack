@@ -4,6 +4,7 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var ThingSchema = new Schema({
+  audio: String,
   name: String,
   info: String,
   active: Boolean

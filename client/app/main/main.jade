@@ -9,28 +9,50 @@ header#banner.hero-unit
 .container
   .row
     .col-lg-12
-      h1.page-header 保存的录音：
+      h1.page-header recordings
       ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in awesomeThings')
         li
           a(href='#', tooltip='{{thing.info}}')
-            audio(ng-src="{{thing.name}}", controls)
+            p {{ thing.name }}
+            audio(ng-src="{{ '/audios/' + thing.audio }}", controls)
             button.close(type='button', ng-click='deleteThing(thing)') ×
 
-  .row
+
+.container(ng-controller="RecordCtrl")
+
+  .row(ng-show="!canRecord")
     .col-lg-12
-      h2.page-header 录音：
-      div(ng-controller="RecordCtrl")
-        button.btn.btn-primary(ng-click="onRecord()", ng-disabled="recording") 开始录
-         | &nbsp
-        button.btn(ng-click="onStopRecord()", ng-disabled="!recording") 停止
-         | &nbsp
+      h2.page-header can't record
+      p.lead.text-danger
+        | You browser not support or you didn't allow microphone access.
 
-        div(ng-show="url")
-          h3 回放：
-          audio(ng-src="{{url}}", controls)
-          br
-          button.btn(ng-click="onUpload()") 上传
+  .row(ng-show="canRecord")
+    .col-lg-12
+      h2.page-header recording
+      button.btn.btn-lg.btn-primary(ng-click="onRecord()", ng-disabled="recording")
+        i.fa.fa-circle
+        | &nbsp;record
+      | &nbsp;
+      button.btn.btn-lg.btn-default(ng-click="onStopRecord()", ng-disabled="!recording")
+        i.fa.fa-stop
+        | &nbsp;stop
 
+  .row(ng-show="recording")
+    .col-lg-12
+      h3 recording time remind
+      progressbar.progress-striped.active(max='30', value='secondsCount')
+        i {{secondsCount}} / 30
+
+  .row(ng-show="url")
+    .col-lg-12
+      h3 review
+      audio(ng-src="{{url}}", controls)
+    .col-lg-4
+      form(ng-submit="onUpload()")
+        .input-group
+          input.form-control(type='text', ng-model="name", placeholder="audio name")
+          span.input-group-btn
+            button.btn.btn-default(type='submit') upload
 
   //- form.thing-form
   //-   label Syncs in realtime across clients

@@ -9,6 +9,7 @@ var favicon = require('serve-favicon');
 var morgan = require('morgan');
 var compression = require('compression');
 var bodyParser = require('body-parser');
+var multer = require('multer')
 var methodOverride = require('method-override');
 var cookieParser = require('cookie-parser');
 var errorHandler = require('errorhandler');
@@ -21,6 +22,7 @@ var mongoose = require('mongoose');
 
 module.exports = function(app) {
   var env = app.get('env');
+  var uploadPath = '';
 
   app.set('views', config.root + '/server/views');
   app.set('view engine', 'jade');
@@ -41,6 +43,7 @@ module.exports = function(app) {
   }));
 
   if ('production' === env) {
+    uploadPath = path.join(config.root, 'public/audios');
     app.use(favicon(path.join(config.root, 'public', 'favicon.ico')));
     app.use(express.static(path.join(config.root, 'public')));
     app.set('appPath', config.root + '/public');
@@ -48,6 +51,7 @@ module.exports = function(app) {
   }
 
   if ('development' === env || 'test' === env) {
+    uploadPath = path.join(config.root, 'client/audios');
     app.use(require('connect-livereload')());
     app.use(express.static(path.join(config.root, '.tmp')));
     app.use(express.static(path.join(config.root, 'client')));
@@ -55,4 +59,8 @@ module.exports = function(app) {
     app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
+  app.use(multer({
+    dest: uploadPath,
+    // inMemory: true
+  }))
 };
