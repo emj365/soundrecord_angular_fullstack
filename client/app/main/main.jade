@@ -14,7 +14,7 @@ header#banner.hero-unit
         li
           a(href='#', tooltip='{{thing.info}}')
             p {{ thing.name }}
-            audio(ng-src="{{ '/audios/' + thing.audio }}", controls)
+            audio(ng-src="{{ '/audios/' + thing.audio }}", controls, preload="none")
             button.close(type='button', ng-click='deleteThing(thing)') ×
 
 
