@@ -35,11 +35,12 @@ angular.module 'papaApp'
   'RecordCtrl',
   ['$scope', '$http', '$window', '$timeout', '$upload', ($scope, $http, $window, $timeout, $upload) ->
 
-    $scope.canRecord    = false
-    $scope.name         = ''
-    $scope.recording    = false
-    $scope.url          = false
-    $scope.secondsCount = 30
+    $scope.canRecord     = false
+    $scope.name          = ''
+    $scope.recording     = false
+    $scope.url           = false
+    $scope.secondsCount  = 30
+    $scope.uploadPercent = 0
 
     mediaRecorder = null
     audioBlob     = null
@@ -93,6 +94,7 @@ angular.module 'papaApp'
           file: file
         ).progress((evt) ->
           console.log "percent: " + parseInt(100.0 * evt.loaded / evt.total)
+          $scope.uploadPercent = parseInt(100.0 * evt.loaded / evt.total)
           return
         ).success((data, status, headers, config) ->
           # file is uploaded successfully
